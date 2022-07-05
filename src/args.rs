@@ -11,10 +11,10 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    ShowProxy(ProxyableAppArgs),
+    GetProxy(ProxyableAppArgs),
     ClearProxy(ProxyableAppArgs),
     SetProxy(SetProxyArgs),
-    ShowMirror(MirrorableAppArgs),
+    GetMirror(MirrorableAppArgs),
     ClearMirror(MirrorableAppArgs),
     SetMirror {
         #[clap(subcommand)]
@@ -54,6 +54,7 @@ pub enum ProxyableApps {
 #[derive(AsRefStr, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
 pub enum MirrorableApps {
     Cargo,
+    Npm,
 }
 
 #[derive(Debug, Subcommand)]
@@ -61,5 +62,9 @@ pub enum MirrorableAppsWithParam {
     Cargo {
         #[clap(value_enum)]
         mirror: crate::cargo::Mirrors,
+    },
+    Npm {
+        #[clap(value_enum)]
+        mirror: crate::npm::Mirrors,
     },
 }

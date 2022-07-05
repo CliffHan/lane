@@ -182,9 +182,9 @@ pub fn unset_proxy() -> Result<(), LaneError> {
     write(&config_file, value.to_string()).map_err(|_| make_write_file_error(&config_file))
 }
 
-pub fn get_mirror() -> Option<Mirrors> {
-    let config_file = home_dir()?.join(CARGO_CONFIG);
-    read_mirror_from_config(&config_file).unwrap_or_default()
+pub fn get_mirror() -> Result<Option<Mirrors>, LaneError> {
+    let config_file = get_config_file_path()?;
+    read_mirror_from_config(&config_file)
 }
 
 pub fn set_mirror(mirror: &Mirrors) -> Result<(), LaneError> {

@@ -7,6 +7,7 @@ mod curl;
 mod error;
 mod git;
 mod manager;
+mod npm;
 mod utils;
 
 fn main() {

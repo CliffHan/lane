@@ -16,6 +16,8 @@ pub enum LaneError {
     NoHomeDir(),
     #[error("Unknown mirror {0}")]
     UnknownMirror(String),
+    #[error("Failed to exec command")]
+    CommandFailed(),
     #[error("Failed. Reason: {0}")]
     Failure(String),
 }
@@ -30,6 +32,10 @@ pub fn make_write_file_error(path: &Path) -> LaneError {
 
 pub fn make_unknown_mirror_error(mirror: &str) -> LaneError {
     LaneError::UnknownMirror(mirror.to_string())
+}
+
+pub fn make_command_failed_error(_error: impl Display) -> LaneError {
+    LaneError::CommandFailed()
 }
 
 pub fn make_failure_error(reason: impl Display) -> LaneError {

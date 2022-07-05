@@ -2,12 +2,14 @@ use crate::args::*;
 use crate::cargo;
 use crate::curl;
 use crate::git;
+use crate::npm;
 use std::fmt::Display;
 
 const CLEAR_PROXY: &str = "Clear proxy";
 const SET_PROXY: &str = "Set proxy";
 const PROMPT_NO_PROXY: &str = "No proxy is set!";
 const CLEAR_MIRROR: &str = "Clear mirror";
+const GET_MIRROR: &str = "Get mirror";
 const SET_MIRROR: &str = "Set mirror";
 const PROMPT_NO_MIRROR: &str = "No mirror is set!";
 
@@ -40,14 +42,16 @@ where
     }
 }
 
-fn print_mirror_option<D1, D2>(app: D1, mirror_option: &Option<D2>)
+fn print_mirror_result<D1, D2, E>(app: D1, mirror_result: &Result<Option<D2>, E>)
 where
     D1: AsRef<str>,
     D2: AsRef<str>,
+    E: Display,
 {
-    match mirror_option {
-        None => println!("{}: {}", app.as_ref(), PROMPT_NO_MIRROR),
-        Some(mirror) => println!("{}: Using mirror: {}", app.as_ref(), mirror.as_ref()),
+    match mirror_result {
+        Err(e) => println!("{}: {} failed! Error: {}", app.as_ref(), GET_MIRROR, e),
+        Ok(None) => println!("{}: {}", app.as_ref(), PROMPT_NO_MIRROR),
+        Ok(Some(mirror)) => println!("{}: Using mirror: {}", app.as_ref(), mirror.as_ref()),
     }
 }
 
@@ -102,12 +106,14 @@ fn set_proxy(args: &SetProxyArgs) {
 
 fn show_mirror(args: &MirrorableAppArgs) {
     use MirrorableApps::*;
-    do_work!(args, Cargo, cargo::get_mirror, print_mirror_option);
+    do_work!(args, Cargo, cargo::get_mirror, print_mirror_result);
+    do_work!(args, Npm, npm::get_mirror, print_mirror_result);
 }
 
 fn clear_mirror(args: &MirrorableAppArgs) {
     use MirrorableApps::*;
     do_work!(args, Cargo, cargo::unset_mirror, CLEAR_MIRROR, print_result);
+    do_work!(args, Npm, npm::unset_mirror, CLEAR_MIRROR, print_result);
 }
 
 fn set_mirror(app: &MirrorableAppsWithParam) {
@@ -121,16 +127,16 @@ fn set_mirror(app: &MirrorableAppsWithParam) {
             }
         }
     }
-    gen_match!(app, Cargo, cargo::set_mirror);
+    gen_match!(app, Cargo, cargo::set_mirror, Npm, npm::set_mirror);
 }
 
 pub fn handle_cli_args(cli: Cli) {
     use Commands::*;
     match cli.command {
-        ShowProxy(args) => show_proxy(&args),
+        GetProxy(args) => show_proxy(&args),
         ClearProxy(args) => clear_proxy(&args),
         SetProxy(args) => set_proxy(&args),
-        ShowMirror(args) => show_mirror(&args),
+        GetMirror(args) => show_mirror(&args),
         ClearMirror(args) => clear_mirror(&args),
         SetMirror { app } => set_mirror(&app),
     }
